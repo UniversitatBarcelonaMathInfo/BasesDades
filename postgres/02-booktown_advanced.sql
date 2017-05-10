@@ -3,6 +3,7 @@ CREATE DATABASE booktown_bis;
 
 \connect booktown_bis;
 
+-- Llibres ( autor, tema )
 CREATE TABLE "books" (
 "id" integer NOT NULL,
 "title" text NOT NULL,
@@ -11,6 +12,7 @@ CREATE TABLE "books" (
 Constraint "books_id_pkey" Primary Key ("id")
 );
 
+-- Editorial
 CREATE TABLE "publishers" (
 "id" integer NOT NULL,
 "name" text,
@@ -18,6 +20,7 @@ CREATE TABLE "publishers" (
 Constraint "publishers_pkey" Primary Key ("id")
 );
 
+-- Autors
 CREATE TABLE "authors" (
 "id" integer NOT NULL,
 "last_name" text,
@@ -25,6 +28,7 @@ CREATE TABLE "authors" (
 Constraint "authors_pkey" Primary Key ("id")
 );
 
+-- Edicions ( llibre, editorial )
 CREATE TABLE "editions" (
   "isbn" text NOT NULL,
   "book_id" integer,
@@ -36,6 +40,7 @@ CREATE TABLE "editions" (
   Constraint "pkey" Primary Key ("isbn")
 );
 
+-- Enviaments ( client )
 CREATE TABLE "shipments" (
   "id" integer DEFAULT nextval('"shipments_ship_id_seq"'::text) NOT NULL,
   "customer_id" integer,
@@ -43,6 +48,7 @@ CREATE TABLE "shipments" (
   "ship_date" timestamp with time zone
 );
 
+-- Client
 CREATE TABLE "customers" (
   "id" integer NOT NULL,
   "last_name" text,
