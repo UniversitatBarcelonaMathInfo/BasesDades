@@ -110,16 +110,22 @@ GROUP BY a.id
 
 SELECT
 *
+--ROUND(AVG(times),2)
 
 FROM
 (
 	SELECT
-	c.id as it, c.first_name, c.last_name, COUNT (s.id) as times
+	c.id as it, c.first_name as fname, c.last_name as lname,
+
+	-- Comptem els c.id, ja que són qui tenen preferencia, i al ser un join no hi ha repetits.
+	COUNT (c.id) as times
 
 	FROM shipments AS s
 	RIGHT JOIN customers c ON s.customer_id = c.id
 
 	GROUP BY c.id
 ) X
+
+--GROUP BY it
 
 ;
