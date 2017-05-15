@@ -4,7 +4,7 @@
 
 ------ Dades que necessitem
 -- editions (book_id, publisher_id) → books (id, author_id) → author (id, first_name, last_name)
---   └→ publishers (id, name)
+--   ↳ publishers (id, name)
 
 ------ Plantejament del problema
 -- El més important és l'autor, tot seguit l'editorial i finalment el nombre de llibres.
@@ -106,26 +106,101 @@ GROUP BY a.id
 
 ------ Plantejament del problema
 -- El més important és el client. Així podrem tenir a la llista clients que no han enviat res.
--- Com que hi ha un condicional, a més de fer anar el GROUB BY també serà indicat fer anar HAVING.
 
-SELECT
-*
---ROUND(AVG(times),2)
-
-FROM
+WITH table_shipments_customers as
 (
 	SELECT
 	c.id as it, c.first_name as fname, c.last_name as lname,
-
-	-- Comptem els c.id, ja que són qui tenen preferencia, i al ser un join no hi ha repetits.
 	COUNT (c.id) as times
-
 	FROM shipments AS s
 	RIGHT JOIN customers c ON s.customer_id = c.id
-
 	GROUP BY c.id
-) X
+)
 
---GROUP BY it
+SELECT
+fname, lname
+FROM table_shipments_customers
 
+WHERE times > all ( SELECT AVG(times) FROM table_shipments_customers )
+;
+
+
+------ Enunciat E.
+-- Llibre més venut independentment de la editorial.
+
+------ Dades que necessitem
+-- shipments (id, isbn)
+
+------ Plantejament del problema
+-- El llibre més venut serà el isbn més repetit dins de shiments.
+-- Com que només indica el llibre més venut, crec que donant el isbn és suficient.
+
+WITH maximum AS
+(
+	SELECT
+	COUNT (*) AS cnt
+	FROM
+	shipments
+
+	GROUP BY
+	isbn
+
+	order by cnt DESC
+	LIMIT 1
+)
+
+SELECT
+isbn as "Llibre més venut (isbn)"
+
+FROM
+shipments
+
+GROUP BY
+isbn
+HAVING COUNT (*) = all (SELECT cnt FROM maximum)
+;
+
+
+------ Enunciat F.
+-- Ordenar les editorials pel nombre d'autors que treballen.
+
+------ Dades que necessitem
+-- editions ( book_id, publisher_id ) → books ( id, author_id )
+--   ↳ publishers ( id, name )
+
+------ Plantejament del problema
+-- Interesa la reunió de editorials amb llibres. Llavors qui tindrà preferència serà editions.
+
+WITH contador AS
+(
+	SELECT
+	e.publisher_id as e_id,			-- edition publisher id
+	COUNT (DISTINCT b.author_id) as cda	-- cda count distinct author
+
+	FROM
+	editions e
+
+	-- Té més interes l'unió que un llibre sol. (Dit en el plantejament)
+	LEFT JOIN
+	books b
+	ON e.book_id = b.id
+
+	GROUP BY
+	e.publisher_id
+)
+
+SELECT
+p.name as "Editorials"
+
+FROM
+contador c
+
+-- Té més interes l'unió que una editorial sola. (Dit en el plantejament)
+LEFT JOIN
+publishers p
+ON c.e_id = p.id
+
+-- Ordenem la informació pel nombre d'autors per editorial.
+ORDER BY
+c.cda
 ;
